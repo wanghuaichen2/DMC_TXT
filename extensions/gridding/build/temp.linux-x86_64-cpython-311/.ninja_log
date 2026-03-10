@@ -1,0 +1,7 @@
+# ninja log v5
+0	20676	1769761018529647422	/home/DMC/extensions/gridding/build/temp.linux-x86_64-cpython-311/gridding_cuda.o	338548bac52176df
+0	63181	1769761061025304609	/home/DMC/extensions/gridding/build/temp.linux-x86_64-cpython-311/gridding.o	31398e6c3ee13384
+0	65783	1769761063625257439	/home/DMC/extensions/gridding/build/temp.linux-x86_64-cpython-311/gridding_reverse.o	8059f8d14746d34f
+5	17309	1769992511991748780	/workspace/cuda121/DMC/extensions/gridding/build/temp.linux-x86_64-cpython-311/gridding_cuda.o	4c515ffbab7f0d2b
+4	56934	1769992551607314562	/workspace/cuda121/DMC/extensions/gridding/build/temp.linux-x86_64-cpython-311/gridding.o	2fa6b1827c8428a3
+5	60222	1769992554893499296	/workspace/cuda121/DMC/extensions/gridding/build/temp.linux-x86_64-cpython-311/gridding_reverse.o	8ed55ce57e99be29

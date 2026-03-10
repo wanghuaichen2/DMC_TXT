@@ -1,0 +1,5 @@
+# ninja log v5
+1	19661	1769760852479479018	/home/DMC/extensions/chamfer_dist/build/temp.linux-x86_64-cpython-311/chamfer_cuda.o	35d9554de0e57c31
+1	58088	1769760890902984337	/home/DMC/extensions/chamfer_dist/build/temp.linux-x86_64-cpython-311/chamfer.o	7beae95be75177e1
+5	17292	1769992401164266030	/workspace/cuda121/DMC/extensions/chamfer_dist/build/temp.linux-x86_64-cpython-311/chamfer_cuda.o	f9d9890f9099fe92
+5	53394	1769992437255909617	/workspace/cuda121/DMC/extensions/chamfer_dist/build/temp.linux-x86_64-cpython-311/chamfer.o	52c914d1ec708dd3

@@ -1,0 +1,4 @@
+NAME: crown
+DATA_PATH: data/dental/crown #存放数据集划分文件
+N_POINTS: 2048
+PC_PATH: /workspace/data/dental/crown #存放数据集

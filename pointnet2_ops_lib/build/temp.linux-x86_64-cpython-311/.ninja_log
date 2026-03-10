@@ -1,0 +1,10 @@
+# ninja log v5
+1	27154	1769852228455955199	/workspace/cuda121/DMC/pointnet2_ops_lib/build/temp.linux-x86_64-cpython-311/pointnet2_ops/_ext-src/src/interpolate.o	373e4d040eff18ae
+1	27477	1769852228776082877	/workspace/cuda121/DMC/pointnet2_ops_lib/build/temp.linux-x86_64-cpython-311/pointnet2_ops/_ext-src/src/bindings.o	995f456f4eb56648
+0	27488	1769852228776082877	/workspace/cuda121/DMC/pointnet2_ops_lib/build/temp.linux-x86_64-cpython-311/pointnet2_ops/_ext-src/src/ball_query.o	960d9c08e7c5d890
+1	27562	1769852228864117988	/workspace/cuda121/DMC/pointnet2_ops_lib/build/temp.linux-x86_64-cpython-311/pointnet2_ops/_ext-src/src/group_points.o	1b93b7b55980f947
+2	27581	1769852228884125968	/workspace/cuda121/DMC/pointnet2_ops_lib/build/temp.linux-x86_64-cpython-311/pointnet2_ops/_ext-src/src/sampling.o	d539e579400c8b02
+1	79983	1769852281263789473	/workspace/cuda121/DMC/pointnet2_ops_lib/build/temp.linux-x86_64-cpython-311/pointnet2_ops/_ext-src/src/group_points_gpu.o	d6b3520a235a2efc
+2	80724	1769852282002583779	/workspace/cuda121/DMC/pointnet2_ops_lib/build/temp.linux-x86_64-cpython-311/pointnet2_ops/_ext-src/src/interpolate_gpu.o	a33da0851624a04a
+1	81027	1769852282305980022	/workspace/cuda121/DMC/pointnet2_ops_lib/build/temp.linux-x86_64-cpython-311/pointnet2_ops/_ext-src/src/ball_query_gpu.o	2186de2840aaa608
+2	83601	1769852284880031445	/workspace/cuda121/DMC/pointnet2_ops_lib/build/temp.linux-x86_64-cpython-311/pointnet2_ops/_ext-src/src/sampling_gpu.o	ad07b37c8965571d

@@ -1,0 +1,5 @@
+# ninja log v5
+1	18565	1769760932202528407	/home/DMC/extensions/cubic_feature_sampling/build/temp.linux-x86_64-cpython-311/cubic_feature_sampling_cuda.o	18cf5b1a95676adc
+1	56786	1769760970414075426	/home/DMC/extensions/cubic_feature_sampling/build/temp.linux-x86_64-cpython-311/cubic_feature_sampling.o	22ab8df4f2e7cbab
+5	15845	1769992455791307220	/workspace/cuda121/DMC/extensions/cubic_feature_sampling/build/temp.linux-x86_64-cpython-311/cubic_feature_sampling_cuda.o	2e135da0955225e2
+4	52250	1769992492188875435	/workspace/cuda121/DMC/extensions/cubic_feature_sampling/build/temp.linux-x86_64-cpython-311/cubic_feature_sampling.o	de09d87dd9c6edae

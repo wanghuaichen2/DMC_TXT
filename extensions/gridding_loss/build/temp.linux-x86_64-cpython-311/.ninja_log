@@ -1,0 +1,5 @@
+# ninja log v5
+1	18780	1769761120149065773	/home/DMC/extensions/gridding_loss/build/temp.linux-x86_64-cpython-311/gridding_distance_cuda.o	f041f9ded1f30b6e
+1	57170	1769761158529099559	/home/DMC/extensions/gridding_loss/build/temp.linux-x86_64-cpython-311/gridding_distance.o	78680fa51c6f94bb
+4	16123	1769992573550325692	/workspace/cuda121/DMC/extensions/gridding_loss/build/temp.linux-x86_64-cpython-311/gridding_distance_cuda.o	356a687f34fbb126
+4	52528	1769992609948290573	/workspace/cuda121/DMC/extensions/gridding_loss/build/temp.linux-x86_64-cpython-311/gridding_distance.o	4a2b7f9a92506c9d
