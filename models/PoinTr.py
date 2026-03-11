@@ -71,13 +71,14 @@ class PoinTr(nn.Module):
         self.knn_layer = config.knn_layer
         self.num_pred = config.num_pred
         self.num_query = config.num_query
-        self.model_sap = Encode2Points("SAP/configs/learning_based/noise_small/ours.yaml")
+        # self.model_sap = Encode2Points("SAP/configs/learning_based/noise_small/ours.yaml")
+        self.model_sap = Encode2Points("SAP/configs/learning_based/noise_large/ours.yaml")
         self.psr2mesh = PSR2Mesh.apply
         self.fold_step = int(pow(self.num_pred//self.num_query, 0.5) + 0.5)
         self.base_model = PCTransformer(in_chans = 3, embed_dim = self.trans_dim, depth = [6, 8], drop_rate = 0., num_query = self.num_query, knn_layer = self.knn_layer, num_heads = 8)
         self.foldingnet = Fold(self.trans_dim, step = self.fold_step, hidden_dim = 256)  # rebuild a cluster point
-        #self.dpsr = DPSR(res=(128,128,  128), sig = 2)
-        self.dpsr = DPSR(res=(256,256,256), sig = 2)
+        self.dpsr = DPSR(res=(128,128,  128), sig = 2)
+        #self.dpsr = DPSR(res=(256,256,256), sig = 2)
 
         self.increase_dim = nn.Sequential(
             nn.Conv1d(self.trans_dim, 1024, 1),

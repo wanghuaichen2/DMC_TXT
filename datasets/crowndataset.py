@@ -135,7 +135,7 @@ class crown(data.Dataset):
         shell_grid = np.float32([])
         # 当 没有 psr.npz 文件，有 真实冠 文件，确定要使用 真实冠数据
         if psr_npz_name is None and crown_ply_name is not None and use_crown:
-            resolution = 256
+            resolution = 128
             dpsr = DPSR(res=(resolution, resolution, resolution), sig = 2)
             # points = np.asarray(shell.points, dtype=np.float32)
             # normals = np.asarray(shell.normals, dtype=np.float32)
