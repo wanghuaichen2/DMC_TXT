@@ -27,12 +27,6 @@ def get_args():
         default=['Preparation', 'Antagonist', 'Crown'],
         help='file name keywords (multiple allowed)'
     )
-    parser.add_argument(
-        '--psr_npz',
-        action='store_true',
-        default=False,
-        help='Is there a psr.npz file')
-
     parser.add_argument('--local_rank', type=int, default=0)
     parser.add_argument('--num_workers', type=int, default=0)
     parser.add_argument('--shell_center', type=int, nargs='+', default=[-25, 5, -4],help='shell_center')

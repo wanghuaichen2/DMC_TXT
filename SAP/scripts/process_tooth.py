@@ -1,7 +1,7 @@
 import multiprocessing
 import numpy as np
 from tqdm import tqdm
-
+from src.dpsr import DPSR
 #from easy_mesh_vtk import Easy_Mesh
 import pyvista as pv
 import os
@@ -9,11 +9,10 @@ from pymeshfix._meshfix import PyTMesh
 from pymeshfix import MeshFix
 import open3d as o3d
 import torch
-from SAP.src.dpsr import DPSR
 
-data_path = '/workspace/data/dental/crown/1162846817/'  # path for ShapeNet from ONet
-data_path_mesh='/workspace/data/dental/crown/1162846817'
-base = '1162846817'  # output base directory
+data_path = 'C:\\Users\\Golriz\\OneDrive - polymtl.ca\\Desktop\\datasap'  # path for ShapeNet from ONet
+data_path_mesh='C:/Users/Golriz/OneDrive - polymtl.ca/Desktop/mesh'
+base = 'data'  # output base directory
 dataset_name = 'shapenet_psr'
 multiprocess = True
 njobs = 8
@@ -26,7 +25,11 @@ padding = 1.2
 out_path_cur_obj='C:\\Users\\Golriz\\OneDrive - polymtl.ca\\Desktop\\datasap'
 dpsr = DPSR(res=(resolution, resolution, resolution), sig=0)
 
-mesh=o3d.io.read_triangle_mesh(os.path.join(data_path_mesh, '1162846817_Crown.ply'))
+
+
+
+
+mesh=o3d.io.read_triangle_mesh(os.path.join(data_path_mesh, 'shell26_registered_watertight.ply'))
 mesh=mesh.subdivide_loop(number_of_iterations=3)
 #mesh = Easy_Mesh(os.path.join(data_path_mesh, '45shell_registered.ply'))
 points = mesh.vertices
