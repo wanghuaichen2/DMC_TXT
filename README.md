@@ -1,309 +1,351 @@
-# 🦷牙冠自动生成项目
+# 🦷 牙冠自动生成项目
 
-本项目为基于3D点云的牙冠自动生成功能。
-原项目[DMC](https://github.com/Golriz-code/DMC)使用PLY格式的点云数据，并缺少模块。
-现已修改为支持**TXT格式**和**PLY格式**的点云数据集，可通过导入镜像文件在docker容器中运行该项目。
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04-354F60?logo=ubuntu&logoColor=white)](https://ubuntu.com/)
+[![Python](https://img.shields.io/badge/Python-3.8-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.7.1-DD0000?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![CUDA](https://img.shields.io/badge/CUDA-11.8-76B900?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda)
+[![Docker](https://img.shields.io/badge/Docker-20.10-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Open3D](https://img.shields.io/badge/Open3D-0.19-0077B2?logo=github&logoColor=white)](http://www.open3d.org/)
+[![License](https://img.shields.io/badge/License-MIT-00AA00?logo=opensourceinitiative&logoColor=white)](LICENSE)
 
-```txt
-1.可根据数据集中牙冠数据（.ply/.txt）点坐标和法向量自动生成psr.npy数据
-2.数据处理模块补充3种裁剪中心方法和下采样方法
-```
-### 训练效果
-| 配置    | Value |
-|---------|-------|
-| max epoch | 100 |
-| batch size | 8 |
-| points | 2048 |
-| Learning rate | 0.0005 |
-| train/test | 773/86 |
+本项目基于 [DMC](https://github.com/Golriz-code/DMC) 进行改进，支持在 Docker 容器中运行，实现基于 3D 点云的牙冠自动生成。
 
+## ✨ 主要特性
 
+- ✅ 支持 TXT 和 PLY 格式的点云数据（包含法向量）
+- ✅ 自动从点云数据生成 PSR（泊松曲面重建）文件（psr.npy）
+- ✅ 3 种自适应裁剪中心方法：基于真实冠、基于立方体、基于球体
 
-| Metric     | Value |
-|------------|-------|
-| chamfer L1 | 0.0832 |
-| chamfer L2 | 0.0173 |
-| metric MSE | 0.0038 |
+***
 
+## 📋 目录
 
-## 1. 在docker中运行项目
+- [快速开始](#-快速开始)
+- [环境要求](#-环境要求)
+- [安装和配置](#-安装和配置)
+- [数据集准备](#-数据集准备)
+- [使用方法](#-使用方法)
+- [配置说明](#-配置说明)
+- [输出说明](#-输出说明)
+- [常见问题](#-常见问题)
 
-### 1.1 获得文件
+***
 
-```txt
-- whc_pytorch271_cuda118_dmc:v4.0.tar # docker镜像文件
-- DMC_TXT.tar                    # 项目文件
-- data_ply.tar                   # 数据集
-```
-
-### 1.2 解压项目
-
-解压项目文件 DMC_TXT.tar
+## 🚀 快速开始
 
 ```bash
-sudo tar -xvf DMC_TXT.tar
+# 1. 导入本地镜像（必须，避免配置环境）
+sudo docker load -i whc_pytorch271_cuda118_dmc:v4.0.tar
+sudo docker images  # 查看导入的镜像
+
+# 2. 启动 Docker 容器
+./run_docker_cuda118.sh
+
+# 3. 在容器内执行训练
+python main.py
+
+# 4. 在容器内执行测试
+python main.py --test --use_crown --ckpts "experiments/PoinTr/Tooth_models/default/ckpt-best.pth"
 ```
 
-解压后文件结构：
+***
 
-```shell
-root@RJZ-WF20240312:/home/DMC_TXT# tree -L 1
-.
-├── SAP
-├── cfgs
-├── data
-├── datasets
-├── extensions
+## 📦 环境要求
+
+| 安装包        | 版本    | 说明           |
+| ------------- | ------- | -------------- |
+| **Ubuntu**    | 22.04.5 | <br />         |
+| **Docker**    | 29.2.0  | <br />         |
+| **Python**    | 3.8     | 本地镜像已预装 |
+| **PyTorch**   | 2.7.1   | 本地镜像已预装 |
+| **CUDA**      | 11.8    | 本地镜像已预装 |
+| **open3d**    | 0.19.0  | 本地镜像已预装 |
+| **pytorch3d** | 0.7.9   | 本地镜像已预装 |
+| **cmake**     | 4.0.2   | 本地镜像已预装 |
+| **chamfer**   | 2.0.0   | 本地镜像已预装 |
+
+> 💡 **作者配置**：RTX 1660 + 16GB 显存 + 32GB 内存
+
+***
+
+***
+
+## 🔧 安装和配置
+
+### 1. 获取文件
+
+需要以下文件：
+
+- `whc_pytorch271_cuda118_dmc:v4.0.tar` # Docker 镜像文件
+- `DMC_BOX.tar`                         # 项目文件
+
+### 2. 解压项目
+
+```bash
+sudo tar -xvf DMC_BOX.tar
+```
+
+解压后的目录结构：
+
+```
+DMC_BOX/
+├── SAP/
+├── cfgs/
+├── data/
+├── datasets/
+├── extensions/
 ├── main.py
-├── models
-├── pointnet2_ops_lib
-├── pytorch3d
-├── readme.txt
-├── rm_psr_npz.sh
-├── run_docker_cuda118.sh
-├── run_main.sh
-├── tools
-└── utils
+├── models/
+├── pointnet2_ops_lib/
+├── pytorch3d/
+├── run_docker_cuda118.sh   # Docker 容器启动脚本
+├── run_main.sh             # 训练/测试脚本
+├── tools/
+├── utils/
+└── README.md
 ```
 
-### 1.2 导入镜像
+### 3. 导入 Docker 镜像
 
-将`whc_pytorch271_cuda118_dmc.tar`导入到本地镜像库
-
-```
+```bash
 sudo docker load -i whc_pytorch271_cuda118_dmc.tar
+sudo docker images  # 查看导入的镜像
 ```
 
-导入完成查看导入的镜像信息
+> 💡 **为什么使用本地镜像？**\
+> 本地镜像已预配置好所有依赖（Python、PyTorch、CUDA、Open3D 等），避免了复杂的环境配置过程，确保环境一致性。
 
-```shell
-sudo docker images
+### 4. 创建和启动容器
+
+修改 `run_docker_cuda118.sh` 中的变量：
+
+```bash
+CONTAINER_NAME="my_dmc_8g"      # 容器名称（自定义）
+IMAGE_ID="ed631bf9e830"         # 镜像 ID（从 docker images 获取）
 ```
 
-输出：
+启动容器：
 
-```.txt
-IMAGE                           ID               DISK USAGE   CONTENT SIZE   EXTRA
-whc_pytorch271_cuda118_dmc:v4.0 e604aeaae42d       31.6GB         10.3GB       U
-```
-
-### 1.2 创建容器
-
-1、进入DMC_TXT目录下
-
-```shell
-cd DMC_TXT
-```
-
-2、修改`run_docker_cuda118.sh`文件中的变量`CONTAINER_NAME`和`IMAGE_ID`。
-
-- CONTAINER_NAME 是容器名字，自定义
-- IMAGE_ID 名字可以使用 `sudo docker images`查看到
-
-3、运行脚本，直接进入容器中。
-
-```shell
+```bash
+cd DMC_BOX
 ./run_docker_cuda118.sh
 ```
 
-run_docker_cuda118.sh内容如下：
+#### 端口映射说明
 
-```shell
-#!/bin/bash
-CONTAINER_NAME="my_cuda118_dmc_all_8g_v4.0"
-IMAGE_ID="e604aeaae42d"       # your images id
+| 参数                     | 说明                             |
+| ---------------------- | ------------------------------ |
+| `-p 8080:22`           | 主机 8080 端口 → 容器 22 端口（远程SSH使用） |
+| `--shm-size=8g`        | 共享内存 8GB                       |
+| `-v $(pwd):/workspace` | 挂载当前目录到容器 `/workspace`         |
 
-# 检查容器是否已存在（包括运行中和已停止的）
-if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
-    echo "The container '${CONTAINER_NAME}' already exists."
-    # 检查容器是否正在运行
-    if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
-        echo "The container is running. Proceed directly..."
-        docker exec -it ${CONTAINER_NAME} bash
-    else
-        echo "The container has been stopped and is now starting up..."
-        docker start ${CONTAINER_NAME}
-        docker exec -it ${CONTAINER_NAME} bash
-    fi
-else
-    echo "The container does not exist. It is being created...."
-    sudo docker run -it \
-        --restart unless-stopped \
-        -p 8089:22 \
-        --shm-size=8g \
-        --name ${CONTAINER_NAME} \
-        --gpus all \
-        -v $(pwd):/workspace \
-        ${IMAGE_ID} bash
-fi
-```
+***
 
-参数详解
+## 📊 数据集准备
 
-| 参数                       | 全称            | 含义                                                         |
-| :------------------------- | :-------------- | :----------------------------------------------------------- |
-| `sudo`                     | -               | 以超级用户权限运行（需要 root 权限操作 Docker）              |
-| `docker run`               | -               | 创建并启动一个新容器                                         |
-| `-i`                       | `--interactive` | 保持 STDIN 打开，允许交互输入                                |
-| `-t`                       | `--tty`         | 分配一个伪终端（TTY），支持命令行交互                        |
-| `--restart unless-stopped` | -               | 重启策略：容器总是自动重启，除非手动停止                     |
-| `-p 8080:22`               | `--publish`     | 端口映射：主机 8080 端口 → 容器 22 端口（SSH）               |
-| `--shm-size=8g`            | -               | 共享内存大小：设置 `/dev/shm` 为 8GB（默认 64MB，深度学习常用） |
-| `--name my_dmc_8g`         | -               | 容器名称：给容器起个名字叫 `my_dmc_8g`                       |
-| `--gpus all`               | -               | GPU 支持：允许容器使用所有可用的 NVIDIA GPU                  |
-| `-v $(pwd):/workspace`     | `--volume`      | 目录挂载：将当前目录挂载到容器的 `/workspace`                |
-| `ed631bf9e830`             | -               | 镜像 ID：使用的 Docker 镜像（可以是镜像名或 ID）             |
-| `bash`                     | -               | 启动命令：容器启动后执行 bash  shell                         |
-
-## 2. 数据集准备
-
-> 在容器中进行，容器中有执行数据集处理的环境。
-
-### 2.1 数据集格式
-
-数据集的格式如下（.TXT一样）：
+### 数据集格式
 
 ```
-data/dental/crown
-├── train.txt            # 训练集样本列表（存放目录名）
-├── test.txt             # 测试集样本列表（存放目录名）
-├── 1162858478_Lower/ #下颚
-│   ├── Preparation.ply       # 主牙齿点云
-│   ├── Antagonist.ply        # 对颌牙齿点云
-│   └── Crown.ply             # 牙冠点云
-├── 1162858518_Upper/ #上颚
-│   ├── Preparation.ply 
-│   ├── Antagonist.ply 
+data/dental/crown/
+├── train.txt            # 训练集样本列表（目录名）
+├── test.txt             # 测试集样本列表（目录名）
+├── 1162858478_Lower/    # 下颚样本
+│   ├── Preparation.ply  # 基牙点云
+│   ├── Antagonist.ply   # 对颌点云
+│   └── Crown.ply        # 牙冠点云（真实值）
+├── 1162858518_Upper/    # 上颚样本
+│   ├── Preparation.ply
+│   ├── Antagonist.ply
 │   └── Crown.ply
 └── ...
 ```
 
-- 每个样本存储在一个单独的文件夹中（例如：1162858478_Lower），代码中会根据目录的'Lower'和'Upper'关键字来判断，基牙在什么位置，如果目录中查找不对关键字，默认下颚。
+#### 文件格式说明
 
-- ply文件格式
-  ```
-  ply
-  format binary_little_endian 1.0
-  comment VCGLIB generated
-  element vertex 205311
-  property double x
-  property double y
-  property double z
-  property double nx
-  property double ny
-  property double nz
-  element face 410618
-  property list uchar int vertex_indices
-  end_header
-  -29.38438416 18.46440506 -9.21412468 0.50048351 -0.86551374 -0.02005653
-  -29.34631348 18.48053932 -8.96335983 0.50025159 -0.86563897 -0.02043301
-  ```
-  
-- TXT文件格式
-  每行包含6个值（空格或制表符分隔）：
-  ```
-  x y z nx ny nz
-  ```
-  - `x, y, z`: 点的3D坐标
-  - `nx, ny, nz`: 点的法向量
-  示例：
+**PLY 格式**：
 
-  ```bash
-  -29.38438416 18.46440506 -9.21412468 0.50048351 -0.86551374 -0.02005653
-  -29.34631348 18.48053932 -8.96335983 0.50025159 -0.86563897 -0.02043301
-  ```
+```
+ply
+format binary_little_endian 1.0
+element vertex 205311
+property double x
+property double y
+property double z
+property double nx
+property double ny
+property double nz
+element face 410618
+property list uchar int vertex_indices
+end_header
+-29.38438416 18.46440506 -9.21412468 0.50048351 -0.86551374 -0.02005653
+```
 
-### 2.2 配置数据集
+**TXT 格式**（每行 6 个值，空格或制表符分隔）：
 
-## 3. 运行项目
+```
+x y z nx ny nz
+-29.38438416 18.46440506 -9.21412468 0.50048351 -0.86551374 -0.02005653
+```
 
-> 在容器中进行。
+### 配置数据集路径
 
-### 3.1 执行训练
+修改 `cfgs/dataset_configs/Tooth.yaml`：
 
-```shell
+```yaml
+NAME: crown
+DATA_PATH: data/dental/crown      # 存放 train.txt/test.txt
+N_POINTS: 10240
+PC_PATH: /workspace/data/dental/crown  # Docker 内的数据路径
+```
+
+> 💡 **注意**：`PC_PATH` 是 Docker 容器内的路径。如果主机数据在 `E:\data\crown`，需要修改 `run_docker_cuda118.sh` 的挂载参数：
+>
+> ```bash
+> -v E:/data/crown:/workspace/data/dental/crown
+> ```
+
+***
+
+## 🎯 使用方法
+
+### 训练模型
+
+```bash
+# 基础训练
+python main.py
+
+# 自定义文件名关键字
 python main.py --file_key_words Preparation Antagonist Crown
 ```
 
-### 3.2 执行测试
+### 测试模型
 
-1. 有真实冠数据（建议）
+#### 方式 1：有真实冠数据（推荐）
 
-```
-python main.py --test --use_crown --ckpts "experiments/PoinTr/Tooth_models/default/ckpt-best.pth" --file_key_words Preparation Antagonist Crown
-```
-
---use_crown ：表示在测试的时候，回去加载数据集中的*_Crown.ply/txt文件，来回去真实的冠数据，获取到真实冠数据用于确定冠的中心，来计算最大值最小值，用于归一化和反归一化。
-
-2. 没有真实冠数据
-
-```
-python main.py --test --ckpts "experiments/PoinTr/Tooth_models/default/ckpt-best.pth" --file_key_words Preparation Antagonist Crown
+```bash
+python main.py --test --use_crown \
+  --ckpts "experiments/PoinTr/Tooth_models/default/ckpt-best.pth" \
+  --file_key_words Preparation Antagonist Crown
 ```
 
-如果没有真实冠数据，则模型不会打印指标，预测出的冠数据保存在./af目录下
+#### 方式 2：无真实冠数据（需指定冠中心）
 
-### 3.3 使用脚本运行
-
-注释掉`1. 生成psr文件`和`2. 训练前检查`，运行run_main.sh脚本中的`3. 执行训练`和`4. 执行测试`。
-
-run_main.sh内容如下：
-
-```python
-#!/bin/bash
-# 1. 执行训练
-python main.py --file_key_words Preparation Antagonist Crown
-
-# 2. 执行测试
-python main.py --test --use_crown --ckpts "experiments/PoinTr/Tooth_models/default/ckpt-best.pth" --file_key_words Preparation Antagonist Crown
+```bash
+python main.py --test \
+  --shell_center [-25, 5, -4] \
+  --ckpts "experiments/PoinTr/Tooth_models/default/ckpt-best.pth" \
+  --file_key_words Preparation Antagonist Crown
 ```
 
-## 4. 相关代码说明
+> ⚠️ **注意**：如果没有真实冠数据，模型不会计算评估指标。
 
-目录说明：
+***
 
-| 文件                              | 说明                              |
-| --------------------------------- | --------------------------------- |
-| `datasets/crowndataset.py`        | 数据集加载器（已修改支持TXT/PLY） |
-| `main.py`                         | 训练/测试入口                     |
-| models/PoinTr.py                  | 定义模型结构                      |
-| `cfgs/dataset_configs/Tooth.yaml` | 数据集配置                        |
-| `cfgs/Tooth_models/PoinTr.yaml`   | 模型配置                          |
+## ⚙️ 配置说明
 
-### 4.1口扫数据切分模块 
+### 关键参数说明
+
+| 参数                 | 类型          | 默认值                             | 说明             |
+| ------------------ | ----------- | ------------------------------- | -------------- |
+| `--config`         | str         | `cfgs/Tooth_models/PoinTr.yaml` | 模型配置文件         |
+| `--file_key_words` | str (nargs) | `Preparation Antagonist Crown`  | 文件名关键字         |
+| `--shell_center`   | int (list)  | `[-25, 5, -4]`                  | 冠中心坐标（无真实冠时使用） |
+| `--use_crown`      | flag        | `False`                         | 是否使用真实冠数据      |
+| `--ckpts`          | str         | `None`                          | 测试时的模型路径       |
+| `--test`           | flag        | `False`                         | 测试模式           |
+| `--resume`         | flag        | `False`                         | 恢复训练           |
+
+## 📁 输出说明
+
+### 训练输出
+
+训练会在 `./experiments/` 下生成：
 
 ```
-datasets/crowndataset.py
-crop_point_cloud(main_opposing, shellP)              # 基于真实冠裁切出立方体
-crop_point_cloud_cuboid(main_opposing, shell_center) # 基于冠中心裁切出立方体
-crop_point_cloud_sphere(main_opposing, shell_center) # 基于冠中心，裁切出球体
+experiments/
+└── PoinTr/
+    └── Tooth_models/
+        └── default/
+            ├── 20260314_120000.log      # 日志文件
+            ├── ckpt-best.pth            # 最佳模型权重
+            └── TFBoard/
+                ├── train/               # 训练 TensorBoard
+                └── test/                # 测试 TensorBoard
 ```
 
-<img src="./media/image-20260314093342004.png" alt="基于真实冠自适应裁剪（倍率0.6）" style="zoom:25%;" /><img src="./media/image-20260314093411526.png" alt="基于冠中心裁剪出球形（半径8）" style="zoom:25%;" /><img src="./media/image-20260314093428136.png" alt="基于牙冠中心立方体裁剪（x/y/z/ 10/10/8）" style="zoom:25%;" /><img src="./media/image-20260314093230716.png" alt="三种裁剪方式汇总" style="zoom:25%;" />
+### 测试输出
 
-### 4.2 dspr分辨率大小模块
+测试结果保存在 `./af/` 和`./Results-pointr/`目录下：
 
-<img src="./media/image-20260314104243203.png" alt="真实冠" style="zoom:25%;" /><img src="./media/image-20260314104302707.png" alt="分辨率128" style="zoom:25%;" /><img src="./media/image-20260314104319872.png" alt="分辨率256" style="zoom:25%;" /><img src="./media/image-20260314104354625.png" alt="分辨率512" style="zoom:25%;" />
+```
+af/                            #重建的网格模型
+Results-pointr/                #预测的牙冠点云
+```
 
-### 4.3下采样（以球形裁剪为例）
+***
 
-<img src="./media/image-20260314105405341.png" alt="下采样正视图" style="zoom:25%;" /><img src="./media/image-20260314105430562.png" alt="下采样侧视图" style="zoom:25%;" /><img src="./media/image-20260314105510601.png" alt="下采样俯视图" style="zoom:25%;" /><img src="./media/image-20260314105556884.png" alt="下采样自由旋转" style="zoom:25%;" />
+## 📚 功能代码说明
 
-## 5. 常见问题
+### 目录结构
 
-### Q: PSR文件是什么？必须要有吗？
+| 文件/目录                         | 说明                                |
+| --------------------------------- | ----------------------------------- |
+| `datasets/crowndataset.py`        | 数据集加载器                        |
+| `main.py`                         | 训练/测试入口                       |
+| `models/PoinTr.py`                | PoinTr 模型定义                     |
+| `cfgs/dataset_configs/Tooth.yaml` | 数据集配置                          |
+| `cfgs/Tooth_models/PoinTr.yaml`   | 模型训练配置                        |
+| `SAP/`                            | Poisson Surface Reconstruction 实现 |
+| `tools/`                          | 训练/测试工具函数                   |
+| `utils/`                          | 工具函数                            |
 
-PSR（Poisson Surface Reconstruction），泊松曲面重建，psr.npy是训练必需的（代码可根据.ply或者.txt点云数据自己生成）。
+***
 
-项目根据真实冠的点和法向量生成psr.npy（形状[128,128,128]）,在训练阶段，与预测出来的psr数据进行对比，计算loss值。
+## ❓ 常见问题
 
-### Q: 如何调整训练/测试集划分？
+### Q1: PSR 文件是什么？必须要有吗？
+
+**PSR**（Poisson Surface Reconstruction，泊松曲面重建）是训练必需的。代码会根据真实冠的点云自动生成 PSR 文件（默认形状 `[128,128,128]`）。
+
+- **作用**：作为训练时的监督信号，与预测结果对比计算 loss
+- **生成时机**：数据加载时自动创建
+- **存储位置**：与点云数据同目录
+
+### Q2: 如何调整训练/测试集划分？
 
 编辑以下文件：
 
-- `data/dental/crown/train.txt` - 训练集样本ID
-- `data/dental/crown/test.txt` - 测试集样本ID
+- `data/dental/crown/train.txt` - 训练集样本 ID
+- `data/dental/crown/test.txt` - 测试集样本 ID
 
-### Q: 可以混合使用PLY和TXT文件吗？
+每行一个目录名，例如：
 
-可以！代码会自动识别文件格式。
+```
+1162858478_Lower
+1162858518_Upper
+1162858523_Lower
+```
+
+### Q3: 可以混合使用 PLY 和 TXT 文件吗？
+
+**可以！** 代码会自动识别文件格式并加载。
+
+***
+
+## 🙏 致谢
+
+- 感谢 [DMC](https://github.com/Golriz-code/DMC) 和[shape_as_points](https://github.com/autonomousvision/shape_as_points)项目提供的基础框架
+- 感谢 PyTorch3D 和 PointNet++提供的工具
+
+***
+
+## 📬 联系方式
+
+如有问题，请通过以下方式联系：
+
+- 提交 GitHub Issue
+- 发送邮件至：\[<153887677@qq.com>]
+
+***
+
+**⭐⭐⭐**
