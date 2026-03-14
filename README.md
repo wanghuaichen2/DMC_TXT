@@ -4,10 +4,9 @@
 原项目[DMC](https://github.com/Golriz-code/DMC)使用PLY格式的点云数据，并缺少模块。
 现已修改为支持**TXT格式**和**PLY格式**的点云数据集，可通过导入镜像文件在docker容器中运行该项目。
 
-## 优化进度，持续更新中...
-2026.03.10(分支：crown_box)：
 ```txt
-1.使用真实牙冠min_gt和max_gt对牙冠的泊松表面重建数据psr.npy进行归一化。
+1.可根据数据集中牙冠数据（.ply/.txt）点坐标和法向量自动生成psr.npy数据
+2.数据处理模块补充3种裁剪中心方法和下采样方法
 ```
 ### 训练效果
 | 配置    | Value |
@@ -271,6 +270,24 @@ python main.py --test --use_crown --ckpts "experiments/PoinTr/Tooth_models/defau
 | `cfgs/dataset_configs/Tooth.yaml` | 数据集配置                        |
 | `cfgs/Tooth_models/PoinTr.yaml`   | 模型配置                          |
 
+### 4.1口扫数据切分模块 
+
+```
+datasets/crowndataset.py
+crop_point_cloud(main_opposing, shellP)              # 基于真实冠裁切出立方体
+crop_point_cloud_cuboid(main_opposing, shell_center) # 基于冠中心裁切出立方体
+crop_point_cloud_sphere(main_opposing, shell_center) # 基于冠中心，裁切出球体
+```
+
+<img src="./media/image-20260314093342004.png" alt="基于真实冠自适应裁剪（倍率0.6）" style="zoom:25%;" /><img src="./media/image-20260314093411526.png" alt="基于冠中心裁剪出球形（半径8）" style="zoom:25%;" /><img src="./media/image-20260314093428136.png" alt="基于牙冠中心立方体裁剪（x/y/z/ 10/10/8）" style="zoom:25%;" /><img src="./media/image-20260314093230716.png" alt="三种裁剪方式汇总" style="zoom:25%;" />
+
+### 4.2 dspr分辨率大小模块
+
+<img src="./media/image-20260314104243203.png" alt="真实冠" style="zoom:25%;" /><img src="./media/image-20260314104302707.png" alt="分辨率128" style="zoom:25%;" /><img src="./media/image-20260314104319872.png" alt="分辨率256" style="zoom:25%;" /><img src="./media/image-20260314104354625.png" alt="分辨率512" style="zoom:25%;" />
+
+### 4.3下采样（以球形裁剪为例）
+
+<img src="./media/image-20260314105405341.png" alt="下采样正视图" style="zoom:25%;" /><img src="./media/image-20260314105430562.png" alt="下采样侧视图" style="zoom:25%;" /><img src="./media/image-20260314105510601.png" alt="下采样俯视图" style="zoom:25%;" /><img src="./media/image-20260314105556884.png" alt="下采样自由旋转" style="zoom:25%;" />
 
 ## 5. 常见问题
 

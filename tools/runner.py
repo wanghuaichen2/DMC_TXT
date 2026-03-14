@@ -97,7 +97,7 @@ def run_net(args, config, config_SAP, train_writer=None, val_writer=None):
         batch_start_time = time.time()
         batch_time = AverageMeter()
         data_time = AverageMeter()
-        # losses = AverageMeter(['SparseLoss', 'DenseLoss'])
+        #losses = AverageMeter(['SparseLoss', 'DenseLoss'])
         num_iter = 0
         epoch_loss = []
         epoch_loss_chamfer = []

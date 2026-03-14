@@ -108,13 +108,10 @@ class crown(data.Dataset):
         测试模式下: 1. 有真实冠，无 psr.npz 数据
                   2. 无真实冠，无 psr.npz 数据
         """
-
         # 1. 加载牙冠数据
         if not use_crown: # 不使用本地真实牙冠数据
             shellP = np.float32([0.0,0.0,0.0])
             shell_center = args.shell_center  # 改值由外界传入
-            min_gt = -11
-            max_gt = 25
             print("不使用真实牙冠数据信息, shell_center 参数从args中获取，shell_center：",shell_center)
         else:
             shell = self.load_point_cloud(os.path.join(self.pc_path, sample['file_path'], crown_ply_name))
@@ -125,11 +122,13 @@ class crown(data.Dataset):
         main = self.load_point_cloud(os.path.join(self.pc_path, sample['file_path'], preparation_ply_name))
         opposing = self.load_point_cloud(os.path.join(self.pc_path, sample['file_path'], antagonist_ply_name))
         main_opposing = np.concatenate((main.points, opposing.points), axis=0)
-        main_opposing_partial = self.crop_point_cloud(main_opposing, shellP)
+        # main_opposing_partial = self.crop_point_cloud(main_opposing, shellP) # 基于真实冠
+        # main_opposing_partial = self.crop_point_cloud_cuboid(main_opposing, shell_center) # 真实冠立方体
+        main_opposing_partial = self.crop_point_cloud_sphere(main_opposing, shell_center) # 真实冠球体
         # np.savetxt('main_opposing_partial.txt', main_opposing_partial, delimiter=' ', fmt='%.6f')
         # 使用上下牙的最大值和最小值
-        min_gt = np.min(shellP).astype(np.float32) - 1.0
-        max_gt = np.max(shellP).astype(np.float32) + 1.0
+        min_gt = np.min(main_opposing_partial).astype(np.float32)
+        max_gt = np.max(main_opposing_partial).astype(np.float32)
 
         # 3. 获取 psr.npz 数据, 如果没有就自动生成
         shell_grid = np.float32([])
@@ -137,11 +136,11 @@ class crown(data.Dataset):
         if psr_npz_name is None and crown_ply_name is not None and use_crown:
             resolution = 128
             dpsr = DPSR(res=(resolution, resolution, resolution), sig = 2)
-            # points = np.asarray(shell.points, dtype=np.float32)
-            # normals = np.asarray(shell.normals, dtype=np.float32)
-            mesh = o3d.io.read_triangle_mesh(os.path.join(self.pc_path, sample['file_path'], crown_ply_name))
-            points = np.asarray(mesh.vertices, dtype=np.float32)
-            normals = np.asarray(mesh.compute_vertex_normals().vertex_normals, dtype=np.float32)
+            points = np.asarray(shell.points, dtype=np.float32)
+            normals = np.asarray(shell.normals, dtype=np.float32)
+            # mesh = o3d.io.read_triangle_mesh(os.path.join(self.pc_path, sample['file_path'], crown_ply_name))
+            # points = np.asarray(mesh.vertices, dtype=np.float32)
+            # normals = np.asarray(mesh.compute_vertex_normals().vertex_normals, dtype=np.float32)
             points = (points - min_gt) / (max_gt - min_gt + 1.0)
             points = np.clip(points, 0, 1) # 裁剪到有效范围, 避免box定义太小造成错误
             points_t = torch.from_numpy(points).unsqueeze(0)  # [1, N, 3]
@@ -163,31 +162,34 @@ class crown(data.Dataset):
         # shell_grid_temp = torch.from_numpy(np.asarray(shell_grid)).float().view(1, resolution, resolution, resolution)
         # v, f, _ = mc_from_psr(shell_grid_temp, zero_level= 0)
         # # denormalize 反归一化
-        # de_p = (v * (max_gt + 1 - min_gt) + min_gt)
+        # de_p = (v * (max_gt + 1.0 - min_gt) + min_gt)
         # mesh_dir = './build_psr_out'
         # os.makedirs(mesh_dir, exist_ok=True)
-        # mesh_out_file = os.path.join(mesh_dir, str(sample['file_path']) + '_chack_psr-256-1-0.ply')
+        # mesh_out_file = os.path.join(mesh_dir, str(sample['file_path']) + '_chack_psr-128-1-0.ply')
         # export_mesh(mesh_out_file, de_p, f)
 
         # 2. 进行下采样
         npoints = self.npoints
+
         if main_opposing_partial.shape[0] > npoints:
             main_only_tensor = torch.from_numpy(main_opposing_partial).float().unsqueeze(0)  #更改形状，转移到GPU上算
             main_opposing_partial = fps(main_only_tensor, self.npoints, device).squeeze(0).cpu() #变回原来的形状，回到cpu上
         else:
             main_opposing_partial = torch.from_numpy(main_opposing_partial).float()
+            print("上下文数据异常：",sample['file_path'],"> 裁剪中心后点数量", main_opposing_partial.shape[0])
         if shellP.shape[0] > npoints:
             shellP_tensor = torch.from_numpy(shellP).float().unsqueeze(0)
             shellP = fps(shellP_tensor, self.npoints, device).squeeze(0).cpu()
         else:
             shellP = torch.from_numpy(shellP).float()
+            print("牙冠数据异常数据：", sample['file_path'], "> 裁剪中心后点数量", main_opposing_partial.shape[0])
 
         # 3.归一化处理
         try:
             main_opposing_partial_only = main_opposing_partial.detach().clone()
             shell_only = shellP.detach().clone()
         except:
-            print("Error:数据处理过程异常（datasets/crowndataset.py：line-114）,异常数据：",sample['file_path'])
+            print("Error:数据归一化异常（datasets/crowndataset.py,异常数据：",sample['file_path'])
         context_partial_only, shell_only, centroid, std_pc = self.normalize_points_mean_std(main_opposing_partial_only, shell_only)
 
         data_partial = context_partial_only.float()
@@ -201,8 +203,8 @@ class crown(data.Dataset):
     def __len__(self):
         return len(self.file_list)
 
-    # 裁剪出基牙主要区域
-    def old_crop_point_cloud(self, pc, shell_center):
+    # 基于冠中心裁剪出基牙立方体，基于中心裁剪固定长宽高的数据box
+    def crop_point_cloud_cuboid(self, pc, shell_center):
         x_range = 10
         y_range = 10
         z_range = 8
@@ -228,7 +230,22 @@ class crown(data.Dataset):
                 shell_center[1] - y_range, shell_center[1] + y_range,
                 shell_center[2] - z_range, shell_center[2] + z_range)
 
-    # 基于牙冠点云来裁剪出基牙主要区域
+    # 基于牙冠中心，裁剪出半径为10的球
+    def crop_point_cloud_sphere(self, pc, shell_center):
+        radius = 10
+        """根据指定中心裁剪出半径为radius的球体内的点云"""
+        pc_xyz = pc[:, :3]
+        # 计算每个点到中心的距离平方（避免开方，提高效率）
+        dist_sq = ((pc_xyz[:, 0] - shell_center[0]) ** 2 +
+                   (pc_xyz[:, 1] - shell_center[1]) ** 2 +
+                   (pc_xyz[:, 2] - shell_center[2]) ** 2)
+        mask = dist_sq <= radius ** 2
+        cropped_pc = pc[mask]
+        if cropped_pc.shape[0] == 0:
+            raise Warning("裁剪后点云为空！建议调整裁剪半径或中心位置")
+        return cropped_pc
+
+    # 基于牙冠数据来裁剪出基牙主要区域，基于真实冠自适应大小，前提有真实冠数据
     def crop_point_cloud(self, pc, shell_points=None):
         """
         基于牙冠中心点和尺寸裁剪点云
