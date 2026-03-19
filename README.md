@@ -68,8 +68,6 @@ python main.py --test --use_crown --ckpts "experiments/PoinTr/Tooth_models/defau
 
 ***
 
-***
-
 ## 🔧 安装和配置
 
 ### 1. 获取文件
