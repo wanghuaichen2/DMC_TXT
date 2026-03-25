@@ -10,8 +10,8 @@
 
 本项目基于 [DMC](https://github.com/Golriz-code/DMC) 进行改进，支持在 Docker 容器中运行（获取镜像移步[Issues](https://github.com/wanghuaichen2/DMC_BOX/issues)），实现基于 3D 点云的牙冠自动生成。
 
-## 🔥最新动态
-- 2026.03.25：我们在[DMC_BOX_INFER]([https://github.com/wanghuaichen2/DMC_BOX/tree/infer](https://github.com/wanghuaichen2/DMC_BOX_INFER))分支增加仅CPU推理版本，可以在Windows上实现推理。
+## 🔥 最新动态
+- 2026.03.25：我们在[DMC_BOX_INFER](https://github.com/wanghuaichen2/DMC_BOX_INFER)中推出了一个仅用于推理的版本！！！
 
 ## ✨ 主要特性
 
