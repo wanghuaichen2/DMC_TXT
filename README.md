@@ -8,7 +8,10 @@
 [![Open3D](https://img.shields.io/badge/Open3D-0.19-0077B2?logo=github&logoColor=white)](http://www.open3d.org/)
 [![License](https://img.shields.io/badge/License-MIT-00AA00?logo=opensourceinitiative&logoColor=white)](LICENSE)
 
-本项目基于 [DMC](https://github.com/Golriz-code/DMC) 进行改进，支持在 Docker 容器中运行，实现基于 3D 点云的牙冠自动生成。
+本项目基于 [DMC](https://github.com/Golriz-code/DMC) 进行改进，支持在 Docker 容器中运行（获取镜像移步[Issues](https://github.com/wanghuaichen2/DMC_BOX/issues)），实现基于 3D 点云的牙冠自动生成。
+
+## 🔥最新动态
+- 2026.03.25：我们在[infer](https://github.com/wanghuaichen2/DMC_BOX/tree/infer)分支增加仅CPU推理版本，可以在Windows上实现推理。
 
 ## ✨ 主要特性
 
@@ -68,8 +71,6 @@ python main.py --test --use_crown --ckpts "experiments/PoinTr/Tooth_models/defau
 
 ***
 
-***
-
 ## 🔧 安装和配置
 
 ### 1. 获取文件
@@ -112,7 +113,7 @@ sudo docker load -i whc_pytorch271_cuda118_dmc.tar
 sudo docker images  # 查看导入的镜像
 ```
 
-> 💡 **为什么使用本地镜像？**\
+> 💡 **为什么使用本地镜像？**
 > 本地镜像已预配置好所有依赖（Python、PyTorch、CUDA、Open3D 等），避免了复杂的环境配置过程，确保环境一致性。
 
 ### 4. 创建和启动容器
@@ -270,6 +271,7 @@ experiments/
             ├── ckpt-best.pth            # 最佳模型权重
             └── TFBoard/
                 ├── train/               # 训练 TensorBoard
+                ├── val/                 # 验证 TensorBoard
                 └── test/                # 测试 TensorBoard
 ```
 
@@ -316,6 +318,7 @@ Results-pointr/                #预测的牙冠点云
 编辑以下文件：
 
 - `data/dental/crown/train.txt` - 训练集样本 ID
+- `data/dental/crown/val.txt` - 验证集样本 ID
 - `data/dental/crown/test.txt` - 测试集样本 ID
 
 每行一个目录名，例如：

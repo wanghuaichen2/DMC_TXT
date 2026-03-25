@@ -50,16 +50,30 @@ def build_opti_sche(base_model, config):
         scheduler = build_lambda_sche(optimizer, sche_config.kwargs)  # misc.py
     elif sche_config.type == 'StepLR':
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, **sche_config.kwargs)
+    elif sche_config.type == 'CosineAnnealingLR':
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer,
+            T_max=sche_config.kwargs.get('T_max', config.max_epoch),
+            eta_min=sche_config.kwargs.get('eta_min', 0)
+        )
     else:
         raise NotImplementedError()
-    
-    if config.get('bnmscheduler') is not None:
+
+    # =====  BN scheduler =====
+    bnscheduler = None
+    if hasattr(config, 'bnmscheduler') and config.bnmscheduler is not None:
         bnsche_config = config.bnmscheduler
         if bnsche_config.type == 'Lambda':
-            bnscheduler = build_lambda_bnsche(base_model, bnsche_config.kwargs)  # misc.py
-        scheduler = [scheduler, bnscheduler]
-    
-    return optimizer, scheduler
+            from utils.misc import build_lambda_bnsche
+            bnscheduler = build_lambda_bnsche(base_model, bnsche_config.kwargs)
+        else:
+            raise NotImplementedError(f"BN scheduler type {bnsche_config.type} not implemented")
+
+    # 返回 scheduler 列表，如果有 BN scheduler
+    if bnscheduler is not None:
+        return optimizer, [scheduler, bnscheduler]
+    else:
+        return optimizer, scheduler
 
 def resume_model(base_model, args, logger = None):
     ckpt_path = os.path.join(args.experiment_path, 'ckpt-last.pth')

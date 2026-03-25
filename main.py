@@ -13,7 +13,7 @@ def main():
     print(os.getcwd())
     print('start main')
     args = parser.get_args()
-    args.exp_name = "train-26-03-14"
+    args.exp_name = "train-26-03-17"
     # CUDA
     args.use_gpu = torch.cuda.is_available()
     if args.use_gpu:

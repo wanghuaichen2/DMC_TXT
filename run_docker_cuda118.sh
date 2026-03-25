@@ -1,5 +1,7 @@
 #!/bin/bash
-CONTAINER_NAME="my_dmc_8g"
+#sudo docker run -it --restart unless-stopped -p 8080:22 --shm-size=8g --name my_dmc_txt_8g --gpus all -v $(pwd):/workspace ed631bf9e830 bash
+
+CONTAINER_NAME="my_dmc_box_8g"
 IMAGE_ID="ed631bf9e830"       # your images id
 
 # 检查容器是否已存在（包括运行中和已停止的）

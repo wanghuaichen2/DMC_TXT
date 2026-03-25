@@ -130,6 +130,7 @@ def run_net(args, config, config_SAP, train_writer=None, val_writer=None):
             loss_chamfer = base_model.module.get_loss(point_r, gt)
             loss_mse = criterion(psr_grid, gt_psr)
             loss = loss_chamfer + loss_mse
+            #loss = loss_chamfer
             loss.backward()
             # optimizer.step()
 
@@ -225,6 +226,7 @@ def validate(base_model, criterion, test_dataloader, epoch, val_writer, args, co
 
         eval_dict = {k: np.mean(v) for k, v in eval_list.items()}
         metric_loss_val = eval_dict['loss_chamfer'] + eval_dict['loss_mse']
+        #metric_loss_val = eval_dict['loss_chamfer']
         logger.info('Validation loss metric : %.4f' % metric_loss_val)
         logger.info('Validation loss_chamfer : %.4f' % (eval_dict['loss_chamfer']))
         logger.info('Validation loss_mse : %.4f' % (eval_dict['loss_mse']))
@@ -297,12 +299,7 @@ def test(base_model, test_dataloader,ChamferDisL1,ChamferDisL2, args, config, lo
                 dense_points = torch.multiply(dense_points[0].cpu(), value_std_pc) + value_centroid
                 np.savetxt(os.path.join(point_dir, str(model_id) + "_points.txt"), dense_points.squeeze(0).cpu().numpy(), fmt='%.6f', delimiter=' ')
 
-
-                min_gt = dense_points.min()
-                max_gt = dense_points.max()
-                psr_grid, points, point_r, min_depoint, max_depoint = base_model(partial, min_gt.cuda(), max_gt.cuda(),value_std_pc.cuda(),value_centroid.cuda())
                 v, f, _ = mc_from_psr(psr_grid, zero_level=threshold)
-
                 # denormalize 反归一化
                 min_depoint = min_depoint.cpu().numpy()
                 max_depoint = max_depoint.cpu().numpy()
@@ -316,17 +313,21 @@ def test(base_model, test_dataloader,ChamferDisL1,ChamferDisL2, args, config, lo
                 export_mesh(mesh_out_file,de_p, f)
                 # write point cloud
                 #np.save(os.path.join(point_dir, str(model_id) + '_predsap.npy'), de_point)
-                np.savetxt(os.path.join(point_dir, str(model_id) + '_dense_points.txt'), de_point.squeeze(0), fmt='%.6f', delimiter=' ')
-
+                np.savetxt(os.path.join(point_dir, str(model_id) + '_dense_points.txt'), de_point.squeeze(0),fmt='%.6f', delimiter=' ')
+                criterion = nn.MSELoss()
                 if args.use_crown:
                     loss_chamfer_l1 = ChamferDisL1(point_r, gt)
                     loss_chamfer_l2 = ChamferDisL2(point_r, gt)
+                    loss_chamfer_val = base_model.get_loss(point_r, gt).item()
+                    loss_mse_val = criterion(torch.tanh(psr_grid), torch.tanh(gt_psr)).item()
                     #loss_chamfer = base_model.get_loss(point_r, gt)
                     logger.info('Loss chamfer L1 : %.4f' % (loss_chamfer_l1))
                     logger.info('Loss chamfer L2 : %.4f' % (loss_chamfer_l2))
-
+                    logger.info('test metric loss_chamfer : %.4f' % (loss_chamfer_val))
+                    logger.info('test metric loss_mse : %.4f' % (loss_mse_val))
                     eval_step_dict['psr_l1'] = F.l1_loss(psr_grid, gt_psr).item()
                     eval_step_dict['psr_l2'] = F.mse_loss(psr_grid, gt_psr).item()
+
                     for k, v in eval_step_dict.items():
                         eval_list[k].append(v)
                     eval_dict = {k: np.mean(v) for k, v in eval_list.items()}

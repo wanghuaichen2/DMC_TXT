@@ -177,7 +177,7 @@ class crown(data.Dataset):
         else:
             main_opposing_partial = torch.from_numpy(main_opposing_partial).float()
             print("上下文数据异常：",sample['file_path'],"> 裁剪中心后点数量", main_opposing_partial.shape[0])
-        if shellP.shape[0] > npoints:
+        if shellP.shape[0] > npoints / 2:
             shellP_tensor = torch.from_numpy(shellP).float().unsqueeze(0)
             shellP = fps(shellP_tensor, self.npoints, device).squeeze(0).cpu()
         else:
